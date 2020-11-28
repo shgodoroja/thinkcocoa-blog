@@ -1,0 +1,7 @@
+baseurl = "https://thinkcocoa.org"
+languageCode = "en-us"
+title = "Think Cocoa"
+theme = "zen"
+
+[params]
+  copyright = "© Stefan Godoroja. 2020. Swift and Cocoa Touch Framework logos are trademarks of Apple Inc."
