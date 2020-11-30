@@ -62,4 +62,4 @@ The solution to this would be to sanitize attributed strings. Remove unnecessary
 In my case, I've removed redundant attributes and set the value of the "star of the show" - `.foregroundColor` attribute to `UIColor.black` to avoid colors with non-supported color space by the `NSCoder`.
 
 ### Final thoughts
-Reading again the error message "Only RGBA or White color spaces are supported in this situation." raises a big question, why this situation is so special? From the message, we can see the Apple developer is aware that other color models won't be supported, but this is fully opaque behavior to the outside developers. 
+Reading again the error message "Only RGBA or White color spaces are supported in this situation." raises a big question, why this situation is so special? From the message, we can see the Apple developer is aware that other color models won't be supported, but this is fully opaque behavior to the outside developers. Bug?!
