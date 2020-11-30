@@ -5,9 +5,10 @@ draft: false
 ---
 ### Introduction
 Saving an attributed string in `Core Data` isn't a difficult job. While the `NSAttributedString` type it's not listed in the entity attribute's type list, you can: 
-1. Set attribute's type to `Transformable`
-2. Create a subclass of `NSSecureUnarchiveFromDataTransformer`
-3. Go back to `Core Data Model` editor, and update `Transformer` field of the attribute, with the class name from the previous step.
+1. Set entity attribute's type to `Transformable`.
+2. Create a subclass of `NSSecureUnarchiveFromDataTransformer`, return `NSAttributedString.self` in `allowedTopLevelClasses` method.
+3. Register the new subclass of `NSSecureUnarchiveFromDataTransformer` before Core Data stack is initialized.
+4. Go back to `Core Data Model` editor, and update `Transformer` field of the attribute, with the class name from the previous step.
 
 That's everything you should usually do to store an attributed string in `Core Data`. However, I've encountered an interesting crash, after implementing this. 
 
@@ -39,7 +40,7 @@ I made a shortlist of the possible sources of the crash:
 
 To check the aforementioned list, I needed a few good hours, mixed with a few breaks. I've also started to question my life choices, whether programming is still the job I want to do ("this damn thing should work, it was working earlier!"). In the end, everything was set up correctly, nothing was misplaced.
 
-I decided to re-read the crash log line by line, to see if I didn't miss anything. Well, of course, I did!
+I decided to re-read the crash log line by line, to see if I didn't miss anything important. Well, of course, I did!
 The crash log length was pretty impressive and after the first 5 lines, it looked homogenous. But not long after I started to analyze again the error message I saw the life-saving `DataModelKit` which is one of my frameworks. On the same line was living this scribble `s12DataModelKit35DMKAttributedStringValueTransformerC018reverseTransformedF0yypSgAEF`. Once I isolated `DMKAttributedStringValueTransformer` from that mess, I instantly realized it was a color value from the attributed string. To prove my assumption right, I checked the attributed string received from the problematic PDF, for the color attributes: 
 
 > NSColor = "kCGColorSpaceModelCMYK 0 0 0 1 1 ";
@@ -59,3 +60,6 @@ No wonder this issue came as a huge surprise. I expected that a class as `NSAttr
 The solution to this would be to sanitize attributed strings. Remove unnecessary attributes aka keep only the attributes you need. Create a new attributed string with the string from the source attributed string. Read attributes' values you're interested in (from source attributed string) and add them in the new attributed string.
 
 In my case, I've removed redundant attributes and set the value of the "star of the show" - `.foregroundColor` attribute to `UIColor.black` to avoid colors with non-supported color space by the `NSCoder`.
+
+### Final thoughts
+Reading again the error message "Only RGBA or White color spaces are supported in this situation." raises a big question, why this situation is so special? From the message, we can see the Apple developer is aware that other color models won't be supported, but this is fully opaque behavior to the outside developers. 
